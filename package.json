@@ -1,0 +1,49 @@
+{
+  "name": "x-portal",
+  "version": "0.0.1",
+  "description": "X-Portal",
+  "main": "index.mjs",
+  "targets": {
+    "default": {
+      "source": "./src/client.mjs",
+      "distDir": "./public"
+    }
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "babel src -s -d dist --keep-file-extension",
+    "build-fe": "parcel build",
+    "start": "npm run build && npm run build-fe && node dist/server.mjs",
+    "dev": "nodemon --exec npm start"
+  },
+  "author": "dane.brdarski@gmail.com",
+  "license": "ISC",
+  "dependencies": {
+    "connect": "^3.7.0",
+    "gun": "^0.2020.1240",
+    "jsx": "file:src/jsx.mjs",
+    "serve-static": "^1.15.0",
+    "url-router": "^13.0.0",
+    "vhost": "^3.0.2"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.21.5",
+    "@babel/core": "^7.21.8",
+    "@babel/node": "^7.20.7",
+    "@babel/plugin-transform-react-jsx": "^7.21.5",
+    "@babel/preset-env": "^7.21.5",
+    "assert": "^2.1.0",
+    "browserify-zlib": "^0.2.0",
+    "buffer": "^6.0.3",
+    "crypto-browserify": "^3.12.0",
+    "events": "^3.3.0",
+    "nodemon": "^2.0.22",
+    "path-browserify": "^1.0.1",
+    "process": "^0.11.10",
+    "stream-browserify": "^3.0.0",
+    "stream-http": "^3.2.0",
+    "url": "^0.11.4",
+    "util": "^0.12.5",
+    "vm-browserify": "^1.1.2"
+  }
+}

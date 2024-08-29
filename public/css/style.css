@@ -1,0 +1,52 @@
+body {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: Nunito;
+  background: #436;
+  color: #fff;
+}
+.login-screen {
+  text-align: center;
+  font-size: 24px;
+  font-weight: 500;
+}
+.passkey-label {
+  font-weight: 600;
+  font-size: 24px;
+}
+.passkey-input {
+  padding: 10px 14px;
+  font-size: 24px;
+  font-weight: 500;
+  border: 2px solid #85a;
+  border-radius: 4px;
+  background: #0003;
+  color: #85a;
+}
+
+.passkey-input:active,
+.passkey-input:focus {
+  border-color: #a7f;
+  outline: #a7f;
+  color: #a7f;
+}
+
+/* Change Autocomplete styles in Chrome*/
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+  font-size: 24px !important;
+  font-weight: 500 !important;
+  border: 1px solid green;
+  -webkit-text-fill-color: green;
+  -webkit-box-shadow: 0 0 0px 1000px #0004 inset;
+  transition: background-color 5000s ease-in-out 0s;
+}
