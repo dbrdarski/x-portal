@@ -16,6 +16,23 @@ body {
   font-weight: 600;
   font-size: 24px;
 }
+
+.passkey-submit-button {
+  background: white;
+  padding: 10px 14px;
+  font-family: Nunito;
+  font-size: 24px;
+  font-weight: 700;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #436;
+  transition: box-shadow .2s;
+}
+.passkey-submit-button:hover,
+.passkey-submit-button:active {
+  box-shadow: 0 0 0 1000px #4366 inset;
+}
 .passkey-input {
   padding: 10px 14px;
   font-size: 24px;

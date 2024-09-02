@@ -1,5 +1,20 @@
 import Gun from "gun"
 import * as Crypto from "./crypto.mjs"
+import routes from "./routes.app.mjs"
+import { createRouter } from "./router.mjs"
+import { h, frag, mountHTML } from "./jsx.mjs"
+import HtmlPage from "./components/HtmlPage.mjs"
+
+globalThis.h = h
+globalThis.frag = frag
+
+window.addEventListener("load", () => {
+  const match = createRouter(HtmlPage, mountHTML(document), routes)
+  const { pathname } = window.location
+  m = match(pathname)
+
+  console.log({ m, pathname })
+})
 
 const $ = (selector, handler) => {
   window.addEventListener("load", () => {
