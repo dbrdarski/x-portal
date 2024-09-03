@@ -9,7 +9,7 @@ const observable = () => {
   const listeners = new Set
   const notify = value => {
     for (const listener of listeners) {
-      console.log({ listener })
+      console.log({ listener, listeners })
       listener(value)
     }
   }
@@ -24,6 +24,7 @@ const observable = () => {
 }
 
 const state = value => {
+  const { notify, subscribe } = observable()
   const getter = () => value
   const setter = (newVal) => {
     if (value !== newVal) {
@@ -31,7 +32,6 @@ const state = value => {
       notify(value)
     }
   }
-  const { notify, subscribe } = observable()
   registerReactive(getter, subscribe)
   return [
     getter,
@@ -46,6 +46,7 @@ const initDeps = (deps, handler) => deps.map(
 )
 
 const computed = (expr, deps) => {
+  const { notify, subscribe } = observable()
   let cache, cached = false
   const invalidate = () => {
     cached = false
@@ -59,30 +60,41 @@ const computed = (expr, deps) => {
     return cache
   }
   const args = initDeps(deps, invalidate)
-  const { notify, subscribe } = observable()
   registerReactive(getter, subscribe)
   return getter
 }
 
 let effectInProgress = false;
 
-const runEffect = (effect, args) => () => {
-  const effectCache = effectInProgress
-  effectInProgress = true
-  effect(...args.map(apply))
-  effectInProgress = effectCache
-  effectInProgress || cleanupEffects()
-}
-
-const effects = []
 const cleanupEffects = () => {
   effects.forEach(apply)
   effects.length = 0
+  effectsScheduled = false
 }
 
-// const scheduleEffect = effect =>
+const wrapEffect = (effect) => () => {
+  const effectCache = effectInProgress
+  effectInProgress = true
+  effect()
+  effectInProgress = effectCache
+}
+
+const effects = []
+let effectsScheduled = false
 
 const effect = (handler, deps) => {
-  const effect = runEffect(() => handler(...args))
-  const args = initDeps(deps, effects.push(effect))
+  let scheduled = false
+  const effect = wrapEffect(
+    () => {
+      handler(...args.map(apply))
+      scheduled = false
+    }
+  ) // problem: ...args initialization
+  const args = initDeps(deps, () => {
+    if (!scheduled) {
+      scheduled = true
+      effects.push(effect)
+      effectsScheduled || queueMicrotask(cleanupEffects)
+    }
+  })
 }
