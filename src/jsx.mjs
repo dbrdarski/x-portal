@@ -1,5 +1,5 @@
 export { printHTML } from "./jsx-print.mjs"
-export { mountHTML } from "./jsx-print.mjs"
+export { mountHTML } from "./jsx-dom.mjs"
 
 export const h = (tag, props, ...children) => ({
   tag,

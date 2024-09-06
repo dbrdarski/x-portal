@@ -1,7 +1,7 @@
 const reactive = new WeakMap
 const registerReactive = reactive.set.bind(reactive)
-const isReactive = reactive.has.bind(reactive)
-const getReactive = reactive.get.bind(reactive)
+export const isReactive = reactive.has.bind(reactive)
+export const getReactive = reactive.get.bind(reactive)
 
 const apply = fn => fn()
 
@@ -23,7 +23,7 @@ const observable = () => {
   return { notify, subscribe }
 }
 
-const state = value => {
+export const state = value => {
   const { notify, subscribe } = observable()
   const getter = () => value
   const setter = (newVal) => {
@@ -45,7 +45,7 @@ const initDeps = (deps, handler) => deps.map(
     : () => dep
 )
 
-const computed = (expr, deps) => {
+export const computed = (expr, deps) => {
   const { notify, subscribe } = observable()
   let cache, cached = false
   const invalidate = () => {
@@ -82,16 +82,19 @@ const wrapEffect = (effect) => () => {
 const effects = []
 let effectsScheduled = false
 
-const effect = (handler, deps) => {
-  let scheduled = false
+export const effect = (handler, deps) => {
+  let cleanup, scheduled = false
+
   const effect = wrapEffect(
     () => {
-      handler(...args.map(apply))
+      // cleanup?.() // maybe here
+      cleanup = handler(...args.map(apply))
       scheduled = false
     }
   ) // problem: ...args initialization
   const args = initDeps(deps, () => {
     if (!scheduled) {
+      cleanup?.() // or here
       scheduled = true
       effects.push(effect)
       effectsScheduled || queueMicrotask(cleanupEffects)

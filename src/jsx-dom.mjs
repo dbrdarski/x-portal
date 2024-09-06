@@ -1,3 +1,5 @@
+import { isReactive, effect } from "./reactive.mjs"
+
 // VDOM -> DOM
 export const mountHTML = documentRoot => vdom => mount(documentRoot.childNodes[1], vdom, 0, documentRoot)
 
@@ -20,7 +22,9 @@ const mountAttrs = (target, props) => {
   for (const [key, value] of Object.entries(props)) {
     switch (typeof value) {
       case "function": {
-        if (key[0] === "o" && key[1] === "n") {
+        if (isReactive(value)) {
+          effect((value) => {target.setAttribute(key, value)}, [value])
+        } else if (key[0] === "o" && key[1] === "n") {
           target[key] = value
           break
         }
@@ -29,7 +33,17 @@ const mountAttrs = (target, props) => {
   }
 }
 
-const mountJSX = (target, { tag, props, children }, indexOffset = 0, parent) => {
+const mountJSX = (target, vdom, indexOffset = 0, parent, parentContext) => {
+  const { tag, props, children } = vdom
+  const context = vdom.context = {
+    vdom,
+    parent,
+    target,
+    prev: null,
+    next: null,
+    prevTarget: null,
+    nextTarget: null,
+  }
   switch (typeof tag) {
     case "string": {
       Object.keys(props).length && mountAttrs(target, props)
@@ -38,7 +52,7 @@ const mountJSX = (target, { tag, props, children }, indexOffset = 0, parent) => 
         return (
           children.reduce(
             (indexOffset, child) =>
-              mount(childNodes[indexOffset], child, indexOffset, target) + 1,
+              mount(childNodes[indexOffset], child, indexOffset, target, context) + 1,
             0),
           indexOffset
         )
@@ -46,10 +60,10 @@ const mountJSX = (target, { tag, props, children }, indexOffset = 0, parent) => 
       return indexOffset
     }
     case "function":
-      return mount(target, tag({ props, children }), indexOffset, parent)
+      return mount(target, tag({ props, children }), indexOffset, parent, context)
     case "object":
       if (tag == null) {
-        return mount(target, children, indexOffset, parent)
+        return mount(target, children, indexOffset, parent, context)
       }
     default: {
       return indexOffset
@@ -57,11 +71,11 @@ const mountJSX = (target, { tag, props, children }, indexOffset = 0, parent) => 
   }
 }
 
-const mount = (target, vdom, indexOffset = 0, parent) => {
+const mount = (target, vdom, indexOffset = 0, parent, parentContext) => {
   if (Array.isArray(vdom)) {
     const { childNodes } = parent
     return vdom.reduce(
-      (indexOffset, vdom, i) => mount(childNodes[indexOffset], vdom, indexOffset, parent) + 1,
+      (indexOffset, vdom, i) => mount(childNodes[indexOffset], vdom, indexOffset, parent, parentContext) + 1,
       indexOffset
     ) - 1
   }
@@ -72,7 +86,23 @@ const mount = (target, vdom, indexOffset = 0, parent) => {
     case undefined:
       return indexOffset - 1
   }
-  return typeof vdom === "string"
-    ? indexOffset
-    : mountJSX(target, vdom, indexOffset, parent)
+
+  switch (typeof vdom) {
+    case "string":
+    case "number":
+      // TODO: handle multimple text nodes, for example: asdf {someVar} bsd
+      return indexOffset
+      // TODO: add syncJSX => isReactive -> effect(syncJSX)
+    default: return mountJSX(target, vdom, indexOffset, parent, parentContext)
+  }
+  // return typeof vdom === "string"
+  //   ? indexOffset
+  //   : mountJSX(target, vdom, indexOffset, parent)
 }
+
+
+
+// Next Big TODOs:
+// ===============
+// Figure out text node one to meny mounting
+// add the context to VDOM trees (double linked lists)

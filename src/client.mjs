@@ -16,15 +16,28 @@ window.addEventListener("load", () => {
   console.log({ m, pathname })
 })
 
-const $ = (selector, handler) => {
+const $ = (...selectors) => handler => {
   window.addEventListener("load", () => {
-    const match = document.querySelector(selector)
-    match && handler(match)
+    const matches = selectors.map(selector => document.querySelector(selector))
+    matches.every(x => x) && handler(...matches)
   })
 }
 
+const preventDefault = e => (e.preventDefault(), false)
+
 let passkey = []
-$(".passkey-input", (input) => {
+$(".passkey-input", ".passkey-preview")((input, preview) => {
+  input.oncut = preventDefault
+  input.oncopy = preventDefault
+  input.onpaste = preventDefault
+
+  input.addEventListener("onkeypress", (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'z') {
+      e.preventDefault()
+      return false
+    }
+  })
+
   input.addEventListener("input", (event) => {
     const { target: { value, selectionStart }, data } = event
     // console.log(data, value, selectionStart, event)
@@ -33,5 +46,6 @@ $(".passkey-input", (input) => {
       : passkey.splice(selectionStart, passkey.length - value.length)
     event.target.value = value.replaceAll(/.{1}/gi, "•")
     event.target.setSelectionRange(selectionStart, selectionStart)
+    preview.setAttribute("style", `--content: "${passkey.join("")}"`)
   })
 })
